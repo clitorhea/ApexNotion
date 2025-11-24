@@ -1,0 +1,220 @@
+/* notionIntegration.css */
+
+/* Connection Status */
+.connection-status {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    background: #f3f3f3;
+    border-radius: 0.25rem;
+    margin-bottom: 1rem;
+}
+
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    animation: pulse 2s infinite;
+}
+
+.status-indicator.connected {
+    background-color: #2e844a;
+    box-shadow: 0 0 0 0 rgba(46, 132, 74, 0.7);
+}
+
+.status-indicator.disconnected {
+    background-color: #c23934;
+    box-shadow: 0 0 0 0 rgba(194, 57, 52, 0.7);
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(46, 132, 74, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(46, 132, 74, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(46, 132, 74, 0);
+    }
+}
+
+.status-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #3e3e3c;
+}
+
+/* Form Elements */
+.custom-combobox,
+.custom-input,
+.custom-textarea {
+    width: 100%;
+}
+
+.custom-textarea {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.character-count {
+    text-align: right;
+    font-size: 0.75rem;
+    color: #706e6b;
+    margin-top: 0.25rem;
+}
+
+/* Success Message */
+.success-message {
+    display: flex;
+    align-items: flex-start;
+    padding: 1rem;
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border-left: 4px solid #2e844a;
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.success-icon {
+    margin-right: 0.75rem;
+    margin-top: 0.125rem;
+}
+
+.success-content {
+    flex: 1;
+}
+
+.success-title {
+    font-weight: 600;
+    color: #065f46;
+    margin-bottom: 0.5rem;
+    font-size: 0.9375rem;
+}
+
+.open-notion-btn {
+    margin-top: 0.5rem;
+    background: #ffffff;
+    border: 1px solid #2e844a;
+    color: #2e844a;
+    font-weight: 500;
+    border-radius: 0.25rem;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.open-notion-btn:hover {
+    background: #2e844a;
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Action Buttons */
+.action-buttons {
+    margin-top: 1.5rem;
+}
+
+.action-buttons lightning-button {
+    width: 100%;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    backdrop-filter: blur(2px);
+}
+
+.loading-text {
+    margin-top: 1rem;
+    font-size: 0.9375rem;
+    color: #3e3e3c;
+    font-weight: 500;
+}
+
+/* Card Styling */
+lightning-card {
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .full-width-mobile {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .slds-col {
+        width: 100%;
+    }
+
+    .success-message {
+        flex-direction: column;
+    }
+
+    .success-icon {
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Custom Scrollbar for Textarea */
+lightning-textarea::part(textarea) {
+    scrollbar-width: thin;
+    scrollbar-color: #c9c9c9 #f3f3f3;
+}
+
+lightning-textarea::part(textarea)::-webkit-scrollbar {
+    width: 8px;
+}
+
+lightning-textarea::part(textarea)::-webkit-scrollbar-track {
+    background: #f3f3f3;
+    border-radius: 4px;
+}
+
+lightning-textarea::part(textarea)::-webkit-scrollbar-thumb {
+    background: #c9c9c9;
+    border-radius: 4px;
+}
+
+lightning-textarea::part(textarea)::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Focus States */
+.custom-input:focus-within,
+.custom-textarea:focus-within,
+.custom-combobox:focus-within {
+    box-shadow: 0 0 0 2px #1589ee;
+    border-radius: 0.25rem;
+}
+
+/* Animation for Success Message */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.success-message {
+    animation: slideIn 0.3s ease-out;
+}

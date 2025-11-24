@@ -1,0 +1,68 @@
+<!-- notionIntegration.html -->
+<template>
+    <lightning-card title="Send Notes to Notion" icon-name="custom:custom63">
+        
+        
+        <!-- Connection Status -->
+        <div class="slds-p-horizontal_medium slds-p-top_small">
+            <div class="connection-status">
+                <div class={statusClass}></div>
+                <span class="status-text">{statusLabel}</span>
+            </div>
+        </div>
+
+        <!-- Main Form -->
+        <div class="slds-p-around_medium">
+            
+            <!-- Data Source Selection -->
+            <div class="slds-form-element slds-m-bottom_medium">
+                <lightning-combobox
+                    name="notion datasource"
+                    label="Data Source"
+                    value={selectedId}
+                    placeholder="Select Notion Source"
+                    options={databaseOptions}
+                    onchange={handleSelectionChange}>
+                </lightning-combobox>
+            </div>
+
+            <div class="slds-p-around_medium">
+                <template lwc:if={isLoading}>
+                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                </template>
+            
+                <lightning-input 
+                    label="Page Title" 
+                    value={noteTitle} 
+                    onchange={handleTitleChange}
+                    placeholder="Enter page title..."
+                    required>
+                </lightning-input>
+                
+                <lightning-textarea 
+                    label="Content" 
+                    value={noteContent} 
+                    onchange={handleContentChange}
+                    placeholder="Type your notes here..."
+                    class="slds-m-top_small">
+                </lightning-textarea>
+
+                <div class="slds-m-top_medium">
+                    <lightning-button 
+                        variant="brand" 
+                        label="Create Page" 
+                        onclick={handleCreate}
+                        disabled={isProcessing}>
+                    </lightning-button>
+                </div>
+
+                <!-- Simple Status Display -->
+                <template if:true={statusMessage}>
+                    <div class="slds-m-top_medium slds-text-color_success">
+                        {statusMessage}
+                    </div>
+                </template>
+            </div>
+        </div>
+    </lightning-card>
+</template>

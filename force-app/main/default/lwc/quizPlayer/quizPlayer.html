@@ -1,0 +1,22 @@
+<template>
+    <template if:true={current}>
+    <h2 class="prompt">{current.prompt}</h2>
+    <div class="options">
+        <template for:each={currentOptions} for:item="opt">
+        <c-quiz-option
+            key={opt.key}
+            label={opt.label}
+            index={opt.idx}
+            selected-index={selectedIndex}
+            onclick={select}>
+        </c-quiz-option>
+        </template>
+    </div>
+
+    <div class="slds-m-top_medium slds-grid slds-wrap slds-grid_align-spread">
+        <lightning-button label="Previous" onclick={prev} disabled={isFirst}></lightning-button>
+        <lightning-button label="Next" onclick={next} disabled={isLast}></lightning-button>
+        <lightning-button variant="brand" label={submitLabel} onclick={submit}></lightning-button>
+    </div>
+    </template>
+</template>

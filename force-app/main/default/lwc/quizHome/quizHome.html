@@ -1,0 +1,36 @@
+<template>
+  <lightning-card title="Practice Quiz" icon-name="utility:quiz">
+    <div class="slds-p-around_medium">
+      <lightning-combobox
+        name="category"
+        label="Category"
+        value={category}
+        options={categoryOptions}
+        onchange={handleCategoryChange}>
+      </lightning-combobox>
+
+      <lightning-input type="number" label="Number of questions" value={limit} min="1" max="50"
+        class="slds-m-top_small" onchange={handleLimitChange}></lightning-input>
+
+      <div class="slds-m-top_medium slds-grid slds-grid_align-end">
+        <lightning-button variant="brand" label="Start Quiz" onclick={start}></lightning-button>
+      </div>
+    </div>
+
+    <template if:true={loading}>
+      <lightning-spinner alternative-text="Loading"></lightning-spinner>
+    </template>
+  </lightning-card>
+
+  <template if:true={payload}>
+    <c-quiz-player
+      session-id={payload.sessionId}
+      questions={payload.questions}
+      onfinished={handleFinished}>
+    </c-quiz-player>
+  </template>
+
+  <template if:true={result}>
+    <c-quiz-result result={result} onrestart={reset}></c-quiz-result>
+  </template>
+</template>

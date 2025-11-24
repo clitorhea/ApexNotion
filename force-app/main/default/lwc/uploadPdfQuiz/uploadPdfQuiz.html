@@ -1,0 +1,40 @@
+<template>
+    <lightning-card title="Upload Q&A PDF" icon-name="standard:document">
+        <div class="slds-p-horizontal_small slds-p-vertical_small">
+            <template if:false={hasUploaded}>
+                <lightning-file-upload
+                    label="Attach PDF with Questions & Answers"
+                    name="pdfUploader"
+                    accept=".pdf"
+                    record-id={recordId}
+                    onuploadfinished={handleUploadFinished}
+                    multiple="false">
+                </lightning-file-upload>
+                <p class="slds-m-top_xx-small slds-text-color_weak">
+                    Only PDF files (.pdf) allowed. Max 10 MB.
+                </p>
+            </template>
+
+            <template if:true={hasUploaded}>
+                <div class="slds-notify slds-notify_toast slds-theme_success" role="alert">
+                    <span class="slds-assistive-text">Success</span>
+                    <span class="slds-icon_container slds-m-right_small">
+                        <lightning-icon icon-name="utility:success" size="x-small"></lightning-icon>
+                    </span>
+                    File uploaded successfully! 
+                    <a onclick={handleViewFile}>View File</a>
+                </div>
+            </template>
+
+            <template if:true={error}>
+                <div class="slds-notify slds-notify_toast slds-theme_error" role="alert">
+                    <span class="slds-assistive-text">Error</span>
+                    <span class="slds-icon_container slds-m-right_small">
+                        <lightning-icon icon-name="utility:error" size="x-small"></lightning-icon>
+                    </span>
+                    {errorMessage}
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>

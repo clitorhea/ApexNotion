@@ -1,0 +1,11 @@
+<template>
+  <lightning-card title="Results" icon-name="utility:success">
+    <div class="slds-p-around_medium">
+      <p class="score">Score: {result.score}%</p>
+      <p>Correct: {result.correct}/{result.total}</p>
+      <div class="slds-m-top_medium">
+        <lightning-button label="Try Again" onclick={restart} variant="brand"></lightning-button>
+      </div>
+    </div>
+  </lightning-card>
+</template>

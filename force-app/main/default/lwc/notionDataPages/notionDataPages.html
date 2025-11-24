@@ -1,0 +1,55 @@
+<template>
+    <lightning-card title={computedTitle} icon-name="standard:link">
+        <div slot="actions">
+            <lightning-button-icon
+                icon-name="utility:refresh"
+                alternative-text="Refresh"
+                title="Refresh"
+                variant="border-filled"
+                onclick={handleRefresh}
+            ></lightning-button-icon>
+        </div>
+
+        <div class="slds-p-around_medium">
+            <template lwc:if={loading}>
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </template>
+
+            <template lwc:if={hasPages}>
+                <ul class="page-list">
+                    <template for:each={pages} for:item="page">
+                        <li key={page.id} class="page-item slds-grid slds-grid_vertical-align-center slds-p-around_small">
+                            <div class="slds-m-right_small">
+                                <lightning-icon icon-name="utility:link" size="x-small" alternative-text="Notion link"></lightning-icon>
+                            </div>
+                            <div class="slds-grid slds-grow slds-grid_vertical slds-truncate">
+                                <a href={page.url} target="_blank" class="page-title slds-truncate" title={page.title}>
+                                    {page.title}
+                                </a>
+                                <span class="id-badge slds-m-top_xx-small" title={page.id}>ID: {page.id}</span>
+                            </div>
+                            <div class="actions slds-m-left_small">
+                                <lightning-button-icon icon-name="utility:new_window" alternative-text="Open" title="Open in new tab" onclick={handleOpen} data-url={page.url} variant="border"></lightning-button-icon>
+                                <lightning-button-icon icon-name="utility:copy" alternative-text="Copy link" title="Copy link" onclick={handleCopyLink} data-url={page.url} variant="border" class="slds-m-left_xx-small"></lightning-button-icon>
+                            </div>
+                        </li>
+                    </template>
+                </ul>
+            </template>
+
+            <template lwc:else>
+                <div class="slds-text-align_center slds-p-around_medium empty-state">
+                    <lightning-icon icon-name="utility:link" size="small" alternative-text="No pages" class="slds-m-bottom_x-small"></lightning-icon>
+                    <div class="slds-text-title_caps slds-m-bottom_xx-small">No Notion Pages</div>
+                    <div class="slds-text-color_weak">No related Notion pages found for this record.</div>
+                </div>
+            </template>
+
+            <template lwc:if={error}>
+                <div class="slds-text-color_error slds-p-top_small">
+                    Error loading pages.
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>

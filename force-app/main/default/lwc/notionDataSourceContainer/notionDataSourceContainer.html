@@ -1,0 +1,11 @@
+<template>
+    <div class="slds-grid slds-wrap slds-gutters">
+        <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3">
+            <c-notion-note-sender onidselected={handleIdSelected}></c-notion-note-sender>
+        </div>
+
+        <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+            <c-notion-data-pages record-id={passedId}> </c-notion-data-pages>
+        </div>
+    </div>
+</template>

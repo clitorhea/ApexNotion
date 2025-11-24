@@ -1,0 +1,116 @@
+<template>
+  <lightning-card title="Import Wizard: PDF → Q&A" icon-name="utility:preview">
+    <div class="slds-p-around_medium slds-grid slds-wrap slds-gutters">
+      <!-- Step 1: Upload -->
+      <div class="slds-col slds-size_1-of-1">
+        <template if:false={hasUpload}>
+          <lightning-input type="file"
+                           accept=".pdf"
+                           label="Select PDF"
+                           onchange={handleFileChange}>
+          </lightning-input>
+
+          <div class="slds-m-top_small">
+            <lightning-button variant="brand"
+                              label="Upload & Start"
+                              onclick={handleUpload}
+                              disabled={isDisabled}>
+            </lightning-button>
+          </div>
+          <template if:true={isUploading}>
+            <div class="slds-m-top_small">
+              <lightning-spinner alternative-text="Uploading..." size="small"></lightning-spinner>
+              <span class="slds-m-left_small">Uploading file…</span>
+            </div>
+          </template>
+        </template>
+
+        <!-- Step 2: Job status -->
+        <template if:true={hasUpload}>
+          <article class="slds-box slds-theme_default slds-m-vertical_medium">
+            <div class="slds-grid slds-wrap slds-gutters slds-m-bottom_small">
+              <div class="slds-col slds-size_1-of-2">
+                <div class="slds-text-title_caps slds-var-p-bottom_xx-small">Job</div>
+                <div><strong>{jobId}</strong></div>
+              </div>
+              <div class="slds-col slds-size_1-of-2">
+                <div class="slds-text-title_caps slds-var-p-bottom_xx-small">Status</div>
+                <div class={statusClass}>
+                  <strong>{jobStatus}</strong>
+                  <template if:true={isPolling}>
+                    <lightning-spinner size="xx-small" alternative-text="Polling"></lightning-spinner>
+                  </template>
+                </div>
+              </div>
+            </div>
+
+            <template if:true={jobMessage}>
+              <div class="slds-text-color_weak">{jobMessage}</div>
+            </template>
+
+            <template if:true={isComplete}>
+              <div class="slds-m-top_small">
+                <lightning-button label="Refresh Preview" onclick={fetchPreview}></lightning-button>
+              </div>
+            </template>
+
+            <template if:true={isError}>
+              <div class="slds-m-top_small slds-text-color_error">{jobError}</div>
+            </template>
+          </article>
+        </template>
+
+        <!-- Step 3: Preview & Edit -->
+        <template if:true={rows.length}>
+          <div class="slds-m-vertical_medium slds-grid slds-wrap slds-gutters">
+            <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+              <div class="slds-text-title">Preview Q&A</div>
+              <div class="slds-text-color_weak">Edit inline, add/remove rows, then Save.</div>
+            </div>
+            <div class="slds-col slds-size_1-of-1 slds-m-bottom_small slds-grid slds-gutters">
+              <div>
+                <lightning-button-icon icon-name="utility:add"
+                                       alternative-text="Add row"
+                                       onclick={handleAddRow}
+                                       class="slds-m-right_x-small"></lightning-button-icon>
+                <lightning-button-icon icon-name="utility:delete"
+                                       alternative-text="Delete selected"
+                                       onclick={handleDeleteSelected}
+                                       disabled={isButtonDisabled}></lightning-button-icon>
+              </div>
+              <div class="slds-m-left_auto">
+                <lightning-input type="text"
+                                 label="Quiz Name (optional)"
+                                 value={quizName}
+                                 onchange={handleQuizNameChange}>
+                </lightning-input>
+              </div>
+            </div>
+            <div class="slds-col slds-size_1-of-1">
+              <lightning-datatable key-field="id"
+                                   data={rows}
+                                   columns={columns}
+                                   draft-values={draftValues}
+                                   onsave={handleSaveDraft}
+                                   onrowselection={handleRowSelection}
+                                   hide-checkbox-column="false"
+                                   show-row-number-column>
+              </lightning-datatable>
+            </div>
+            <div class="slds-col slds-size_1-of-1 slds-m-top_medium">
+              <lightning-button variant="brand"
+                                label="Save to Salesforce"
+                                onclick={handlePersist}
+                                disabled={isSaveDisabled}>
+              </lightning-button>
+              <template if:true={isPersisting}>
+                <lightning-spinner size="small" alternative-text="Saving…"></lightning-spinner>
+                <span class="slds-m-left_small">Saving Q&A…</span>
+              </template>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+  </lightning-card>
+</template>
