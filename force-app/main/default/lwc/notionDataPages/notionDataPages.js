@@ -1,4 +1,5 @@
 import queryPages from '@salesforce/apex/NotionDataSourceService.queryPages';
+import retrieveBlockChildren from '@salesforce/apex/NotionDataSourceService.retrieveBlockChildren';
 import { api, LightningElement, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
@@ -7,6 +8,11 @@ export default class NotionDataPages extends LightningElement {
     @track pages = [];
     @track loading = false;
     @track error;
+    @track showModal = false;
+    @track selectedPage = null;
+    @track blocks = [];
+    @track blocksLoading = false;
+    @track blocksError;
 
     @api
     get recordId() {
@@ -125,6 +131,42 @@ export default class NotionDataPages extends LightningElement {
                     variant: 'error'
                 })
             );
+        }
+    }
+
+    handlePageTitleClick(event) {
+        const id = event.currentTarget?.dataset?.id;
+        if (!id) return;
+        const page = (this.pages || []).find(p => p.id === id);
+        if (page) {
+            this.selectedPage = page;
+            this.showModal = true;
+            this.loadBlocks(page.id);
+        }
+    }
+
+    closeModal() {
+        this.showModal = false;
+        this.selectedPage = null;
+    }
+
+    openSelectedPage() {
+        if (this.selectedPage && this.selectedPage.url) {
+            window.open(this.selectedPage.url, '_blank');
+        }
+    }
+
+    async loadBlocks(pageId) {
+        this.blocksLoading = true;
+        this.blocksError = null;
+        this.blocks = [];
+        try {
+            const result = await retrieveBlockChildren({ pageId });
+            this.blocks = result || [];
+        } catch (e) {
+            this.blocksError = e;
+        } finally {
+            this.blocksLoading = false;
         }
     }
 }

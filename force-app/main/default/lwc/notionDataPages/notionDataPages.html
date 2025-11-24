@@ -23,8 +23,20 @@
                                 <lightning-icon icon-name="utility:link" size="x-small" alternative-text="Notion link"></lightning-icon>
                             </div>
                             <div class="slds-grid slds-grow slds-grid_vertical slds-truncate">
-                                <a href={page.url} target="_blank" class="page-title slds-truncate" title={page.title}>
+                                <!-- Page Title opens modal with info -->
+                                <button type="button"
+                                        class="page-title slds-button slds-button_reset slds-text-link slds-truncate"
+                                        title={page.title}
+                                        data-id={page.id}
+                                        onclick={handlePageTitleClick}>
                                     {page.title}
+                                </button>
+                                <!-- Separate Page URL link display -->
+                                <a href={page.url}
+                                   target="_blank"
+                                   class="page-url slds-text-body_small slds-truncate"
+                                   title={page.url}>
+                                    {page.url}
                                 </a>
                                 <span class="id-badge slds-m-top_xx-small" title={page.id}>ID: {page.id}</span>
                             </div>
@@ -52,4 +64,54 @@
             </template>
         </div>
     </lightning-card>
+
+    <!-- Modal: Page Info -->
+    <template lwc:if={showModal}>
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="notionPageModalHeading" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="Close" variant="inverse" size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 id="notionPageModalHeading" class="slds-text-heading_medium">Notion Page Details</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium" id="notionPageModalContent">
+                    <template lwc:if={selectedPage}>
+                        <div class="slds-m-bottom_small"><span class="slds-text-title">Title:</span> {selectedPage.title}</div>
+                        <div class="slds-m-bottom_small">
+                            <span class="slds-text-title">URL:</span>
+                            <a href={selectedPage.url} target="_blank" class="slds-m-left_xx-small">{selectedPage.url}</a>
+                        </div>
+                        <div class="slds-m-bottom_small"><span class="slds-text-title">ID:</span> {selectedPage.id}</div>
+
+                        <div class="slds-m-vertical_medium">
+                            <div class="slds-text-title_caps slds-m-bottom_x-small">Blocks</div>
+                            <template lwc:if={blocksLoading}>
+                                <lightning-spinner size="small" alternative-text="Loading blocks"></lightning-spinner>
+                            </template>
+                            <template lwc:if={blocksError}>
+                                <div class="slds-text-color_error slds-m-top_x-small">Error loading blocks.</div>
+                            </template>
+                            <template lwc:if={blocks}>
+                                <ul class="block-list">
+                                    <template for:each={blocks} for:item="blk">
+                                        <li key={blk.id} class="block-item slds-p-vertical_xx-small">
+                                            <span class="slds-badge slds-m-right_x-small">{blk.type}</span>
+                                            <span class="slds-truncate" title={blk.textContent}>{blk.textContent}</span>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Close" onclick={closeModal}></lightning-button>
+                    <lightning-button label="Open in New Tab" variant="brand" class="slds-m-left_small" onclick={openSelectedPage}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
 </template>
