@@ -11,13 +11,38 @@
         </div>
 
         <div class="slds-p-around_medium">
+            <!-- Filters: Search + Sort -->
+            <div class="filters slds-grid slds-wrap slds-gutters slds-m-bottom_small">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-3">
+                    <lightning-input
+                        type="search"
+                        label="Search pages"
+                        value={searchTerm}
+                        onchange={handleSearchChange}
+                        placeholder="Search by title or URL"
+                    ></lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                    <lightning-combobox
+                        name="sortBy"
+                        label="Sort by"
+                        value={sortBy}
+                        options={sortOptions}
+                        onchange={handleSortChange}
+                    ></lightning-combobox>
+                </div>
+            </div>
+
             <template lwc:if={loading}>
                 <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
             </template>
 
-            <template lwc:if={hasPages}>
+            <!-- Pages available -->
+            <template lwc:if={hasAnyPages}>
+                <!-- Filtered results -->
+                <template lwc:if={hasFilteredPages}>
                 <ul class="page-list">
-                    <template for:each={pages} for:item="page">
+                    <template for:each={filteredPages} for:item="page">
                         <li key={page.id} class="page-item slds-grid slds-grid_vertical-align-center slds-p-around_small">
                             <div class="slds-m-right_small">
                                 <lightning-icon icon-name="utility:link" size="x-small" alternative-text="Notion link"></lightning-icon>
@@ -43,12 +68,26 @@
                             <div class="actions slds-m-left_small">
                                 <lightning-button-icon icon-name="utility:new_window" alternative-text="Open" title="Open in new tab" onclick={handleOpen} data-url={page.url} variant="border"></lightning-button-icon>
                                 <lightning-button-icon icon-name="utility:copy" alternative-text="Copy link" title="Copy link" onclick={handleCopyLink} data-url={page.url} variant="border" class="slds-m-left_xx-small"></lightning-button-icon>
+                                <lightning-button-icon icon-name="utility:copy_to_clipboard" alternative-text="Copy ID" title="Copy ID" onclick={handleCopyId} data-id={page.id} variant="border" class="slds-m-left_xx-small"></lightning-button-icon>
                             </div>
                         </li>
                     </template>
                 </ul>
+                </template>
+                <!-- No matches under current filters -->
+                <template lwc:else>
+                    <div class="slds-text-align_center slds-p-around_medium empty-state">
+                        <lightning-icon icon-name="utility:search" size="small" alternative-text="No matches" class="slds-m-bottom_x-small"></lightning-icon>
+                        <div class="slds-text-title_caps slds-m-bottom_xx-small">No Matches</div>
+                        <div class="slds-text-color_weak">Try adjusting your search or sort.</div>
+                        <template lwc:if={searchTerm}>
+                            <div class="slds-text-color_weak slds-m-top_x-small">Showing 0 of {totalCount} total pages.</div>
+                        </template>
+                    </div>
+                </template>
             </template>
 
+            <!-- No pages at all -->
             <template lwc:else>
                 <div class="slds-text-align_center slds-p-around_medium empty-state">
                     <lightning-icon icon-name="utility:link" size="small" alternative-text="No pages" class="slds-m-bottom_x-small"></lightning-icon>
@@ -76,7 +115,7 @@
                     </button>
                     <h2 id="notionPageModalHeading" class="slds-text-heading_medium">Notion Page Details</h2>
                 </header>
-                <div class="slds-modal__content slds-p-around_medium" id="notionPageModalContent">
+                <div class="slds-modal__content slds-p-around_medium modal-content" id="notionPageModalContent">
                     <template lwc:if={selectedPage}>
                         <div class="slds-m-bottom_small"><span class="slds-text-title">Title:</span> {selectedPage.title}</div>
                         <div class="slds-m-bottom_small">
@@ -86,23 +125,99 @@
                         <div class="slds-m-bottom_small"><span class="slds-text-title">ID:</span> {selectedPage.id}</div>
 
                         <div class="slds-m-vertical_medium">
-                            <div class="slds-text-title_caps slds-m-bottom_x-small">Blocks</div>
+                            <div class="slds-grid slds-grid_align-spread slds-m-bottom_x-small">
+                                <div class="slds-text-title_caps">Blocks</div>
+                                <lightning-button-icon icon-name="utility:refresh" alternative-text="Refresh blocks" title="Refresh blocks" onclick={handleRefreshBlocks}></lightning-button-icon>
+                            </div>
                             <template lwc:if={blocksLoading}>
                                 <lightning-spinner size="small" alternative-text="Loading blocks"></lightning-spinner>
                             </template>
                             <template lwc:if={blocksError}>
                                 <div class="slds-text-color_error slds-m-top_x-small">Error loading blocks.</div>
                             </template>
-                            <template lwc:if={blocks}>
+                            <template lwc:if={viewBlocks}>
                                 <ul class="block-list">
-                                    <template for:each={blocks} for:item="blk">
-                                        <li key={blk.id} class="block-item slds-p-vertical_xx-small">
-                                            <span class="slds-badge slds-m-right_x-small">{blk.type}</span>
-                                            <span class="slds-truncate" title={blk.textContent}>{blk.textContent}</span>
+                                    <template for:each={viewBlocks} for:item="blk">
+                                        <li key={blk.id} class="block-item slds-grid slds-gutters_x-small slds-p-vertical_xx-small">
+                                            <div class="block-icon">
+                                                <lightning-icon icon-name={blk.iconName} size="x-small" alternative-text={blk.typeLabel}></lightning-icon>
+                                            </div>
+                                            <div class={blk.wrapperClass}>
+                                                <div class={blk.textClass} title={blk.textContent}>{blk.textContent}</div>
+                                            </div>
+                                            <div class="block-type-badge">
+                                                <span class="slds-badge slds-theme_shade">{blk.typeLabel}</span>
+                                            </div>
                                         </li>
                                     </template>
                                 </ul>
                             </template>
+                        </div>
+
+                        <div class="append-panel slds-m-top_medium slds-box slds-theme_default">
+                            <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-m-bottom_small">
+                                <div class="slds-text-title_caps slds-grid slds-grid_vertical-align-center">
+                                    <lightning-icon icon-name="utility:add" size="xx-small" class="slds-m-right_x-small" alternative-text="Append"></lightning-icon>
+                                    Append Block
+                                </div>
+                                <lightning-button-group>
+                                    <lightning-button label="Paragraph" title="Paragraph" data-type="paragraph" variant={quickTypeVariantParagraph} onclick={handleTypeQuickSelect}></lightning-button>
+                                    <lightning-button label="H1" title="Heading 1" data-type="heading_1" variant={quickTypeVariantH1} onclick={handleTypeQuickSelect}></lightning-button>
+                                    <lightning-button label="H2" title="Heading 2" data-type="heading_2" variant={quickTypeVariantH2} onclick={handleTypeQuickSelect}></lightning-button>
+                                    <lightning-button label="H3" title="Heading 3" data-type="heading_3" variant={quickTypeVariantH3} onclick={handleTypeQuickSelect}></lightning-button>
+                                </lightning-button-group>
+                            </div>
+
+                            <div class="slds-grid slds-wrap slds-gutters_small">
+                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                                    <lightning-combobox
+                                        name="blockType"
+                                        label="Type"
+                                        value={newBlockType}
+                                        options={blockTypeOptions}
+                                        onchange={handleNewBlockTypeChange}
+                                    ></lightning-combobox>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-3">
+                                    <lightning-input
+                                        type="url"
+                                        label="Link (optional)"
+                                        placeholder="https://example.com (optional)"
+                                        value={newBlockLink}
+                                        onchange={handleNewBlockLinkChange}
+                                    ></lightning-input>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1">
+                                    <lightning-textarea
+                                        label="Text"
+                                        placeholder={newBlockPlaceholder}
+                                        value={newBlockText}
+                                        onchange={handleNewBlockTextChange}
+                                        required
+                                        message-when-value-missing="Please enter some text"
+                                    ></lightning-textarea>
+                                    <div class="slds-text-color_weak slds-text-body_small slds-m-top_xx-small">{newBlockCharCount} characters</div>
+                                </div>
+
+                                <template lwc:if={newBlockText}>
+                                    <div class="slds-col slds-size_1-of-1">
+                                        <div class="slds-text-title_caps slds-m-bottom_xx-small">Preview</div>
+                                        <div class="slds-box slds-theme_shade">
+                                            <div class={newBlockPreviewClass}>{newBlockText}</div>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <div class="slds-col slds-size_1-of-1 append-actions slds-text-align_right">
+                                    <lightning-button label="Reset" onclick={handleResetAppend} class="slds-m-right_small"></lightning-button>
+                                    <lightning-button
+                                        variant="brand"
+                                        label={appendButtonLabel}
+                                        onclick={handleAppendBlock}
+                                        disabled={disableAppend}
+                                    ></lightning-button>
+                                </div>
+                            </div>
                         </div>
                     </template>
                 </div>

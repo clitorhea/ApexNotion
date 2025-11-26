@@ -140,7 +140,7 @@ public with sharing class NotionDataSourceService {
         return joinPlainText(richText);
     }
 
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled(cacheable=false)
     public static List<NotionBlock> retrieveBlockChildren(String pageId){
         if (String.isBlank(pageId)) return new List<NotionBlock>();
         NotionConfig.Cfg cfg = NotionConfig.get();
