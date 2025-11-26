@@ -20,6 +20,7 @@ export default class NotionDataPages extends LightningElement {
     @track appendLoading = false;
     @track searchTerm = '';
     @track sortBy = 'title_asc';
+    refreshKey = 0;
 
     @api
     get recordId() {
@@ -363,7 +364,7 @@ export default class NotionDataPages extends LightningElement {
         this.blocksError = null;
         this.blocks = [];
         try {
-            const result = await retrieveBlockChildren({ pageId });
+            const result = await retrieveBlockChildren({ pageId : pageId , refreshKey : this.refreshKey});
             this.blocks = result || [];
         } catch (e) {
             this.blocksError = e;
@@ -372,9 +373,14 @@ export default class NotionDataPages extends LightningElement {
         }
     }
 
+    forceRefresh() {
+        this.refreshKey = Date.now(); // or ++this.refreshKey;
+    }
+
     handleRefreshBlocks() {
         if (this.selectedPage && this.selectedPage.id) {
-            this.loadBlocks(this.selectedPage.id);
+            this.forceRefresh();
+            this.loadBlocks(this.selectedPage.id , this.refreshKey);
         }
     }
 
@@ -423,6 +429,7 @@ export default class NotionDataPages extends LightningElement {
             this.newBlockText = '';
             this.newBlockLink = '';
             // Reload blocks
+            this.forceRefresh();
             await this.loadBlocks(this.selectedPage.id);
         } catch (e) {
             this.dispatchEvent(new ShowToastEvent({ title: 'Append failed', message: 'Could not append block.', variant: 'error' }));

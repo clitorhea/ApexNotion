@@ -52,6 +52,8 @@ public with sharing class NotionDataSourceService {
 
             String id = (String)result.get('id');
             String url = (String)result.get('url');
+            String createdTime = (String) result.get('created_time'); 
+            String editedTime = (String) result.get('last_edited_time');
 
             String title = extractTitle(result);
 
@@ -59,6 +61,8 @@ public with sharing class NotionDataSourceService {
             p.id = id;
             p.title = title;
             p.url = url;
+            p.created_time = createdTime; 
+            p.last_edited_time = editedTime; 
 
             output.add(p);
         }
@@ -108,19 +112,6 @@ public with sharing class NotionDataSourceService {
         return String.join(parts, '');
     }
 
-    public class NotionPage {
-        @AuraEnabled public String id;
-        @AuraEnabled public String title;
-        @AuraEnabled public String url;
-    }
-
-    public class NotionBlock{
-        @AuraEnabled public String id;
-        @AuraEnabled public String type;
-        @AuraEnabled public String textContent; 
-        @AuraEnabled public Boolean hasChildren;
-    }
-
     public static String extractTextContent(Map<String,Object> block , String type){
         if (block == null || String.isBlank(type)) return '';
         Map<String, Object> propType = (Map<String,Object>) block.get(type);
@@ -140,8 +131,8 @@ public with sharing class NotionDataSourceService {
         return joinPlainText(richText);
     }
 
-    @AuraEnabled(cacheable=false)
-    public static List<NotionBlock> retrieveBlockChildren(String pageId){
+    @AuraEnabled(cacheable=true)
+    public static List<NotionBlock> retrieveBlockChildren(String pageId , String refreshKey){
         if (String.isBlank(pageId)) return new List<NotionBlock>();
         NotionConfig.Cfg cfg = NotionConfig.get();
 
