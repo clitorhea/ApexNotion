@@ -20,7 +20,7 @@ public with sharing class NotionDataSourceService {
     }
 
     @AuraEnabled(cacheable=false)
-    public static List<NotionPage> queryPages(String dataSourceId) {
+    public static List<NotionPage> queryPages(String dataSourceId , String resfreshToken) {
         NotionConfig.Cfg cfg = NotionConfig.get();
         Http http = new Http();
         HttpRequest req = new HttpRequest();
@@ -68,6 +68,37 @@ public with sharing class NotionDataSourceService {
         }
 
         return output;
+    }
+
+    @AuraEnabled
+    public static List<Object> deletePage(String pageId, String refreshKey){
+        System.debug('delete page api: '); 
+        if(pageId == null) throw new AuraHandledException('page id not exist'); 
+        NotionConfig.Cfg cfg = NotionConfig.get(); 
+        String endpoint = NC + '/v1/pages/' + pageId ; 
+        try {
+            HttpRequest request = new HttpRequest();
+            request.setEndpoint(endpoint); 
+            request.setMethod('PATCH'); 
+            request.setTimeout(120000);
+            request.setHeader('Notion-Version' , cfg.apiVersion);
+            request.setHeader('Authorization', getAuthHeader()); 
+            request.setHeader('Content-Type', 'application/json');
+            String body = '{"archived": true }';
+            request.setBody(body);
+            Http http = new Http();
+            HttpResponse res = http.send(request);
+            if(res.getStatusCode() > 300) {
+                throw new AuraHandledException('response code');
+            }
+            Map<String,Object> parsed = (Map<String,Object>)JSON.deserializeUntyped(res.getBody());
+            List<Object> results = (List<Object>)parsed.get('results');
+            if(results != null ){
+                return results;
+            }return new List<Object>(); 
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
     }
 
     private static String extractTitle(Map<String,Object> page) {
@@ -141,7 +172,7 @@ public with sharing class NotionDataSourceService {
         String base = NC + '/v1/blocks/' + pageId + '/children';
         String cursor = null;
         Boolean hasMore = true;
-
+        //Boolean isArchived = false; 
         try {
             while (hasMore) {
                 HttpRequest req = new HttpRequest();
@@ -151,7 +182,6 @@ public with sharing class NotionDataSourceService {
                 req.setTimeout(120000);
                 req.setHeader('Notion-Version', cfg.apiVersion);
                 req.setHeader('Authorization', getAuthHeader());
-
                 HttpResponse res = http.send(req);
                 if (res.getStatusCode() >= 300) {
                     throw new AuraHandledException('Failed to fetch blocks');
@@ -168,13 +198,15 @@ public with sharing class NotionDataSourceService {
                         String type = (String) result.get('type');
                         String textContent = extractTextContent(result, type);
                         Boolean hasChildren = (Boolean)result.get('has_children');
-
+                        Boolean isArchived = (Boolean) result.get('archived'); 
+                        if(isArchived == true){
+                            continue;
+                        }
                         NotionBlock nb = new NotionBlock();
                         nb.id = id;
                         nb.type = type;
                         nb.textContent = textContent;
                         nb.hasChildren = hasChildren;
-
                         output.add(nb);
                     }
                 }
@@ -187,10 +219,21 @@ public with sharing class NotionDataSourceService {
                     hasMore = false;
                 }
             }
-
             return output;
         } catch (Exception e) {
             throw new AuraHandledException('Failed to retrieve Notion blocks');
+        }
+    }
+
+    @AuraEnabled
+    public static List<NotionBlock> deleteBlockChildren(String pageId, String refreshKey){
+        if (String.isBlank(pageId)) return new List<NotionBlock>();
+
+        try {
+            HttpRequest req = new HttpRequest(); 
+            return null; 
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
         }
     }
 }

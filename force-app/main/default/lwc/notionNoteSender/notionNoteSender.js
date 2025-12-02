@@ -77,15 +77,17 @@ export default class NotionNoteSender extends LightningElement {
                 bodyContent: this.noteContent,
             });
             
-            if (result.object) {
+            if (result) {
                 this.showSuccess = true;
-                this.createdPageUrl = result.pageUrl;
-                this.showToast('Success', result.message, 'success');
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Success',
+                        message: 'Done',
+                        variant: 'success'
+                    })
+                );
                 this.resetForm();
-            } else {
-                console.log(result.message)
-                this.showToast('Error', result.message, 'error');
-            }
+            } 
         } catch (error) {
             this.showToast('Error Creating Note', 'error');
             console.log(error);

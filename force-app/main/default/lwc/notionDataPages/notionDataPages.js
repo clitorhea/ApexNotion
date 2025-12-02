@@ -3,6 +3,8 @@ import retrieveBlockChildren from '@salesforce/apex/NotionDataSourceService.retr
 import appendBlockChildren from '@salesforce/apex/NotionBlocksController.appendBlockChildren';
 import { api, LightningElement, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import deletePage from '@salesforce/apex/NotionDataSourceService.deletePage';
+import LightningConfirm from 'lightning/confirm';
 
 export default class NotionDataPages extends LightningElement {
     _recordId;
@@ -44,7 +46,7 @@ export default class NotionDataPages extends LightningElement {
         this.error = null;
         
         try {
-            const result = await queryPages({ dataSourceId: id });
+            const result = await queryPages({ dataSourceId: id , refreshKey : this.refreshKey });
             this.pages = result;
         } catch (error) {
             this.error = error;
@@ -435,6 +437,41 @@ export default class NotionDataPages extends LightningElement {
             this.dispatchEvent(new ShowToastEvent({ title: 'Append failed', message: 'Could not append block.', variant: 'error' }));
         } finally {
             this.appendLoading = false;
+        }
+    }
+
+    async handleDeletePage(event){
+        const id = event.currentTarget?.dataset?.id;
+        const result = await LightningConfirm.open({
+            message: 'Are you completely sure to delete this page',
+            variant: 'Confirm Delete',
+            label: 'Confirm Delete',
+            // setting theme would have no effect
+        });
+        if(result){
+            this.loading = true;
+            try{
+                const isDeleted = await deletePage({pageId : id , refreshKey: this.refreshKey});
+                if(isDeleted){
+                    this.dispatchEvent(
+                        new ShowToastEvent({
+                            title: 'Deleted',
+                            message: 'The page has been deleted',
+                            variant: 'success'
+                        })
+                    );
+                    this.forceRefresh();
+                    this.handleRefresh();
+                }
+            }catch(e){
+                this.dispatchEvent(new ShowToastEvent({
+                    title : 'Delete failed' , 
+                    message : 'Could not delete page' , 
+                    variant : 'error'
+                }))
+            }finally{
+                this.loading = false;
+            }
         }
     }
 }

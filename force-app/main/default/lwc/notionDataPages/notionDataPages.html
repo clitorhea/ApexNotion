@@ -57,17 +57,18 @@
                                     {page.title}
                                 </button>
                                 <!-- Separate Page URL link display -->
-                                <a href={page.url}
+                                <!-- <a href={page.url}
                                    target="_blank"
                                    class="page-url slds-text-body_small slds-truncate"
                                    title={page.url}>
                                     {page.url}
-                                </a>
+                                </a> -->
                                 <span class="id-badge slds-m-top_xx-small" title={page.id}>ID: {page.id}</span>
                             </div>
                             <div class="actions slds-m-left_small">
                                 <lightning-button-icon icon-name="utility:new_window" alternative-text="Open" title="Open in new tab" onclick={handleOpen} data-url={page.url} variant="border"></lightning-button-icon>
-                                <lightning-button-icon icon-name="utility:copy" alternative-text="Copy link" title="Copy link" onclick={handleCopyLink} data-url={page.url} variant="border" class="slds-m-left_xx-small"></lightning-button-icon>
+                                <lightning-button-icon icon-name="utility:delete" alternative-text="Delete" title="Delete" onclick={handleDeletePage} data-id={page.id} variant="border" class="slds-m-left_xx-small"></lightning-button-icon>
+                                <!-- <lightning-button-icon icon-name="utility:save" alternative-text="Confirm" title="confirm button" onclick={handleConfirmClick} variant="border" class="slds-m-left_xx-small"></lightning-button-icon> -->
                                 <lightning-button-icon icon-name="utility:copy_to_clipboard" alternative-text="Copy ID" title="Copy ID" onclick={handleCopyId} data-id={page.id} variant="border" class="slds-m-left_xx-small"></lightning-button-icon>
                             </div>
                         </li>
