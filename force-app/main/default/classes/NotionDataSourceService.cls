@@ -72,7 +72,6 @@ public with sharing class NotionDataSourceService {
 
     @AuraEnabled
     public static List<Object> deletePage(String pageId, String refreshKey){
-        System.debug('delete page api: '); 
         if(pageId == null) throw new AuraHandledException('page id not exist'); 
         NotionConfig.Cfg cfg = NotionConfig.get(); 
         String endpoint = NC + '/v1/pages/' + pageId ; 
@@ -226,12 +225,30 @@ public with sharing class NotionDataSourceService {
     }
 
     @AuraEnabled
-    public static List<NotionBlock> deleteBlockChildren(String pageId, String refreshKey){
-        if (String.isBlank(pageId)) return new List<NotionBlock>();
-
+    public static Map<String,Object> deleteBlockChildren(String blockId){
+        if (String.isBlank(blockId)) return new Map<String,Object>();
+        NotionConfig.Cfg cfg = NotionConfig.get(); 
+        Http http = new Http(); 
+        String endpoint = NC + '/v1/blocks/' + blockId; 
         try {
             HttpRequest req = new HttpRequest(); 
-            return null; 
+            req.setEndpoint(endpoint) ; 
+            req.setTimeout(120000); 
+            req.setMethod('DELETE');
+            req.setHeader('Authorization', getAuthHeader()); 
+            req.setHeader('Notion-Version', cfg.apiVersion) ; 
+            
+            HttpResponse res = http.send(req) ;
+            if(res.getStatusCode() > 300){
+                throw new AuraHandledException('Delete Block Children Failed');
+            }
+            Map<String,Object> parsed = (Map<String,Object>) JSON.deserializeUntyped(res.getBody()); 
+            // List<Object> results = (List<Object>) parsed.get('results') ; 
+            if(parsed != null) { 
+                System.debug(parsed); 
+                return parsed ; 
+            }
+            return new Map<String,Object>(); 
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage());
         }

@@ -5,6 +5,7 @@ import { api, LightningElement, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import deletePage from '@salesforce/apex/NotionDataSourceService.deletePage';
 import LightningConfirm from 'lightning/confirm';
+import deleteBlockChildren from '@salesforce/apex/NotionDataSourceService.deleteBlockChildren';
 
 export default class NotionDataPages extends LightningElement {
     _recordId;
@@ -472,6 +473,34 @@ export default class NotionDataPages extends LightningElement {
             }finally{
                 this.loading = false;
             }
+        }
+    }
+
+    async handleDeleteBlock(event){
+        const id = event.currentTarget?.dataset?.id; 
+        const result = await LightningConfirm.open({
+            title : '' , 
+            message : 'delete this block ?' , 
+            variant : 'success'
+        })
+        try{
+            if(result) {
+                this.blocksLoading = true; 
+                const isDelete = await deleteBlockChildren({blockId : id})
+                if(isDelete) {
+                    this.dispatchEvent(new ShowToastEvent({
+                        title : 'Deleted' , 
+                        message: 'Block deleted', 
+                        variant : 'success'
+                    }))
+                }
+                this.forceRefresh(); 
+                await this.loadBlocks(this.selectedPage.id);
+            }
+        }catch (error){
+            console.log(error)
+        }finally{
+            this.blocksLoading = false; 
         }
     }
 }
